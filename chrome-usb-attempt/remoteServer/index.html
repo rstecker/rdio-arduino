@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <style>
+      body { 
+        background-color: yellow;
+      }
+    </style>
+    <script>
+      function next() {
+        // alert("HI!");$('.notes').append(event+" boom !!!<BR>")
+        $('.notes').append("Start this")
+        $(window).on('message', function(event) {
+            $('.notes').append(event+" boom !!!<BR>")
+        });
+      }
+
+    </script>
+  </head>
+  <body>
+    <button onclick="next()">Next!</button><br>
+hello there!
+  </body>
+</html>

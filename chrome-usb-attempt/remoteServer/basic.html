@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mobile playback with Rdio JS API in an iframe</title>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <!--<script src="basic.js"></script>-->
+    <style>
+      body { 
+        background-color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    start <a href="http://www.rdio.com/developers/app/ka__oAAJoYKDCd-bwedD_w/">My dev page</a>
+    <button onclick="R.authenticate( {mode: 'redirect'} );">CLICK ME</button>
+    <br>
+    <button onclick="R.player.previous();postMsg('prev',R.player.playState());">Previous</button>
+    <button onclick="R.player.togglePause();postMsg('togglePause',R.player.playState());">Start/Stop</button>
+    <button onclick="R.player.next();postMsg('next',R.player.playState());">Next</button>
+    <br><div class="notes">--</div>
+    <script src="//www.rdio.com/api/api.js?client_id=ka__oAAJoYKDCd-bwedD_w"></script>
+    <script>
+      window.eventSource = null;
+      window.eventOrigin = null;
+      window.addEventListener('message', function(event) {
+        var command = event.data.command;
+        $('.notes').append("RECIEVED A MESSAGE <BR>");
+
+        if (command == "rebecca") {
+          $('body').css('background-color', 'white');
+          R.player.togglePause();
+          postMsg("togglePause", true);
+        }
+        if (command == "sync") {
+          window.eventSource = event.source;
+          window.eventOrigin = event.origin;
+          var result = false;
+          if (R && R.player) {
+            result = R.player.playState();
+          }
+          postMsg("synced",result);
+        }
+      });
+      function postMsg(command, value) {
+        window.eventSource.postMessage({'command': command, 'value': value}, window.eventOrigin);        
+      }
+      R.ready(function() {
+        $('.notes').append("B<BR>"+R.authenticated()+"<BR>");
+        if( R.authenticated()) {
+          $('body').css('background-color', 'green');
+          $('.notes').prepend("<BR>"+R.currentUser.get('vanityName')+"<BR>");
+          var reportTrack = function(track) {
+            if (!track || !track.get) {
+              return;
+            }
+            console.log("the track is now " + track);
+            $('.notes').prepend(track.get('name') + " from " + track.get('album') + " by "+ track.get('artist')+"<BR>");
+          }
+          R.player.on("change:playingTrack", reportTrack);
+          R.player.on("change:playState", function(newVal) {
+            postMsg("playChange",newVal);
+          });
+          reportTrack(R.player.playingTrack());
+        }else {
+          $('body').css('background-color', 'red')
+          $('notes').prepend("<BR>I HAVE NOTHING<BR>");
+        }
+      });
+      
+    </script>
+  </body>
+</html>
